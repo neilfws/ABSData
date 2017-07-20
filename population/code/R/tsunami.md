@@ -9,6 +9,8 @@ compiled `r Sys.time()`
 
     While the census showed Australia overall is aging, there’s been a noticeable lift in the number of people aged between 25 to 32.
     As the accompanying graph shows…
+    
+![](../../output/smh-tsunami.jpg)
 
 Whoa, that is one ugly chart. First thought: let’s not be too hard on Fairfax Media, they’ve sacked most of their real journalists and they took the chart from [someone else](http://petewargent.blogspot.com.au/2017/06/demographic-tsunami.html). Second thought: if you want to visualise change over time, time as an axis rather than a coloured bar is generally a good idea.
 
