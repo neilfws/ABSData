@@ -68,7 +68,7 @@ Things get less tsunami-like when we try to visualize age brackets as a proporti
 
 When you put things out on Twitter, be sure that chart nerds will descent to join in the fun.
 
-https://twitter.com/tslumley/status/881778448720470016
+https://twitter.com/MattCowgill/status/881800327560708097
 
 Matt rightly asks: what's the proportion of 25-32 year-olds anyway? We can reproduce his line charts like so. Now we see that 25-32 year-olds as a percentage of total population have increased recently after an all-time (since 1971) low and in fact, the rate of increase seems to have slowed. Tsunami?
 
