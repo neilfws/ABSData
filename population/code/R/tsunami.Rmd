@@ -157,7 +157,7 @@ p1 <- auspop %>%
     scale_color_gradientn(colors = c("blue", "yellow", "red")) + 
     coord_flip()
 
-gganimate(p1, ani.width = 800, ani.height = 800, filename = "../../output/tsunami.gif")
+gganimate(p1, ani.width = 500, ani.height = 500, filename = "../../output/tsunami.gif")
 ```
 
 ![](../../output/tsunami.gif)
@@ -242,7 +242,7 @@ p1 <- ggplot() +
         scale_x_continuous(breaks = seq(0, 100, 10)) + 
         scale_y_continuous(labels = abs(seq(-200000, 200000, 50000)), breaks = seq(-200000, 200000, 50000))
 
-gganimate(p1, ani.width = 800, ani.height = 800, filename = "../../output/pyramid.gif")
+gganimate(p1, ani.width = 500, ani.height = 500, filename = "../../output/pyramid.gif")
 ```
 
 ![](../../output/pyramid.gif)
