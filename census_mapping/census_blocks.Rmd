@@ -1,0 +1,159 @@
+---
+title: 'Where no-one lives in Sydney: a comparison of Hornsby and the Eastern Suburbs'
+author: "Neil Saunders"
+date: "`r Sys.time()`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
+library(tidyverse)
+library(knitr)
+library(gpclib)
+library(rgdal)
+library(maptools)
+
+theme_set(theme_bw())
+
+getSA <- function(spdf, sa, census) {
+  gpclibPermit()
+  sa.points <- fortify(spdf[grep(sa, spdf$SA3_NAME11), ], region = "id")
+  sa <- inner_join(sa.points, spdf@data, by = "id")
+  m   <- match(sa$MB_CODE11, census$Mesh_Block_ID)
+  sa$persons <- census[m, "Persons_Usually_Resident"]
+  sa$empty   <- ifelse(sa$persons == 0, "no people", "people")
+  return(sa)
+}
+
+censuscounts_mb_2011_aust <- read_csv("../../data/census/2011/censuscounts_mb_2011_aust.csv")
+```
+
+# Introduction
+I like maps that show data - [for example this map](http://gothamist.com/2014/04/17/heres_a_map_of_the_places_in_the_us.php) of places in the United States where no-one lives. However, none of my work projects have required me to learn mapping skills in R.
+
+So for fun, I decided to recreate the USA analysis using Australian census data for two statistical areas in Sydney: Hornsby, a low population density area where I currently live and the Eastern Suburbs, a high population density area where I lived previously.
+
+I was guided by two resources: [plotting polygon shapefiles](https://github.com/hadley/ggplot2/wiki/plotting-polygon-shapefiles) and [Making Maps in R](http://www.kevjohnson.org/making-maps-in-r/).
+
+# Getting the data
+
+## The Census data
+Census data was obtained from the Australian Bureau of Statistics. [The data source](http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/2074.02011?OpenDocument) is called _2074.0 - Census of Population and Housing: Mesh Block Counts, 2011_ and can be downloaded from the website as a CSV file.
+
+## The Map data
+Map data were also obtained from the Australian Bureau of Statistics. [This source](http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/1270.0.55.001July%202011?OpenDocument) is called _1270.0.55.001 - Australian Statistical Geography Standard (ASGS): Volume 1 - Main Structure and Greater Capital City Statistical Areas, July 2011_. I downloaded the zip file _New South Wales Mesh Blocks ASGS Ed 2011 Digital Boundaries in ESRI Shapefile Format_, which unzips to 5 files: MB\_2011\_NSW.cpg, MB\_2011\_NSW.dbf, MB\_2011\_NSW.prj, MB\_2011\_NSW.shp and MB\_2011\_NSW.shx.
+
+# Data processing
+First, we load the required packages and read the census data into a data frame. Note that on Ubuntu-like systems, the _rgdal_ package requires `sudo apt-get install libgdal-dev libproj-dev`.
+
+Next, we read in the New South Wales shapefile to create an object of class _SpatialPolygonsDataFrame_. This stores the polygon data for drawing maps along with any other data that we want to use. Adding a key, _id_, helps us to join coordinates with other data in a later step.
+
+```{r}
+nsw <- readOGR(dsn = "~/Dropbox/projects/ausmaps/data/shapefiles/asgs/2011/", 
+               layer = "MB_2011_NSW")
+nsw@data$id <- rownames(nsw@data)
+```
+
+Exploring the object reveals that the areas we want to use are stored under the name _SA3\_NAME11_. Hornsby is one area; the Eastern Suburbs is split into North and South. Census Mesh Block IDs are stored under _MB\_CODE11_.
+
+```{r}
+head(levels(nsw$SA3_NAME11), 35)
+```
+
+We write a function to melt the data for each area into a data frame of points, join with the shapefile data, match to the census data and then add the population information.
+
+```{r}
+# Hornsby
+hornsby <- getSA(nsw, "Hornsby", censuscounts_mb_2011_aust)
+# Eastern Suburbs
+eastern <- getSA(nsw, "Eastern Suburbs", censuscounts_mb_2011_aust)
+```
+
+# Visualization
+Let's start by trying to convey an impression of population density.
+
+## Population - Eastern Suburbs
+This area contains several blocks with a very high number of residents. Comparison with Sydney suburbs on a Google Map shows that these blocks include Matraville, Maroubra and the University of New South Wales campus.
+
+```{r fig.height=9, fig.width=7}
+eastern %>%
+    ggplot(aes(long, lat, group = group, fill = persons)) + 
+    geom_polygon() + 
+    coord_map() + 
+    theme(axis.ticks = element_blank(), 
+          axis.text = element_blank(), 
+          axis.title = element_blank(), 
+          panel.grid = element_blank(), 
+          panel.border = element_blank()) + 
+    labs(title = "Eastern Suburbs") + 
+    scale_fill_gradient2(midpoint = 1000)
+```
+
+## Population - Hornsby
+The overall impression of Hornsby compared with the Eastern Suburbs is one of lower density with more, larger empty blocks. The southern end of the area contains a couple of high density blocks near the boundary of the suburbs Hornsby and Waitara.
+
+```{r fig.height=9, fig.width=7}
+hornsby %>%
+  ggplot(aes(long, lat, group = group, fill = persons)) + 
+    geom_polygon() + 
+    coord_map() + 
+    theme(axis.ticks = element_blank(), 
+          axis.text = element_blank(), 
+          axis.title = element_blank(), 
+          panel.grid = element_blank(), 
+          panel.border = element_blank()) + 
+    labs(title = "Hornsby") + 
+    scale_fill_gradient2(midpoint = 400)
+```
+
+## Empty blocks - Eastern Suburbs
+The United States map used green for empty blocks and white for blocks with residents. I think this is counter-intuitive and so have reversed the colour scheme.
+
+I was initially surprised that there are any empty blocks in the Eastern Suburbs but of course, every area contains land that is not residential such as parks. Notable large uninhabited regions include the Centennial Parklands and Malabar Headland National Park.
+
+```{r fig.height=9, fig.width=7}
+eastern %>%
+  ggplot(aes(long, lat, group = group, fill = empty)) + 
+    geom_polygon(color = "grey30", size = 0.1) + 
+    coord_map() + 
+    scale_fill_manual(values = c("white", "darkolivegreen4"), 
+                      name = "people?", 
+                      labels = c("no", "yes"),
+                      na.value = "grey70") + 
+    theme(axis.ticks = element_blank(), 
+          axis.text = element_blank(), 
+          axis.title = element_blank(), 
+          panel.grid = element_blank(), 
+          panel.border = element_blank()) + 
+    labs(title = "Eastern Suburbs")
+```
+
+## Empty blocks - Hornsby
+Once again the overall impression is one of more, larger empty blocks. Many of these correspond to the extensive bushland of the Hornsby region, such as the Berowra Valley and Ku-ring-ai Chase National Parks and Muogamarra Nature Reserve.
+
+```{r fig.height=9, fig.width=7}
+hornsby %>%
+  ggplot(aes(long, lat, group = group, fill = empty)) + 
+    geom_polygon(color = "grey30", size = 0.1) + 
+    coord_map() + 
+    scale_fill_manual(values = c("white", "darkolivegreen4"), 
+                      name = "people?", 
+                      labels = c("no", "yes"),
+                      na.value = "grey70") + 
+    theme(axis.ticks = element_blank(), 
+          axis.text = element_blank(), 
+          axis.title = element_blank(), 
+          panel.grid = element_blank(), 
+          panel.border = element_blank()) + 
+    labs(title = "Hornsby")
+```
+
+# Summary
+
+- It's easy to generate high-quality, attractive and informative maps using R
+- There are undoubtedly faster, more elegant ways to do it than those used in this document; in particular, we have not yet looked at _geom\_map_
+- Do you like quiet, wide open spaces? Choose Hornsby Shire :)
