@@ -1,7 +1,7 @@
 Where no-one lives in Sydney: a comparison of Hornsby and the Eastern Suburbs
 ================
 Neil Saunders
-2018-04-04 07:29:05
+2018-04-04 07:54:40
 
 -   [Introduction](#introduction)
 -   [Getting the data](#getting-the-data)
@@ -45,7 +45,7 @@ First, we load the required packages and read the census data into a data frame.
 Next, we read in the New South Wales shapefile to create an object of class *SpatialPolygonsDataFrame*. This stores the polygon data for drawing maps along with any other data that we want to use. Adding a key, *id*, helps us to join coordinates with other data in a later step.
 
     ## OGR data source with driver: ESRI Shapefile 
-    ## Source: "/Users/neil/Dropbox/projects/ausmaps/data/shapefiles/asgs/2011", layer: "MB_2011_NSW"
+    ## Source: "/Users/neil/Dropbox/projects/github_projects/ABSData/census_mapping/data/shapefiles/asgs/2011", layer: "MB_2011_NSW"
     ## with 107325 features
     ## It has 16 fields
 

@@ -29,7 +29,7 @@ getSA <- function(spdf, sa, census) {
   return(sa)
 }
 
-censuscounts_mb_2011_aust <- read_csv("../../data/census/2011/censuscounts_mb_2011_aust.csv")
+censuscounts_mb_2011_aust <- read_csv("data/census/2011/censuscounts_mb_2011_aust.csv")
 ```
 
 # Introduction
@@ -53,7 +53,7 @@ First, we load the required packages and read the census data into a data frame.
 Next, we read in the New South Wales shapefile to create an object of class _SpatialPolygonsDataFrame_. This stores the polygon data for drawing maps along with any other data that we want to use. Adding a key, _id_, helps us to join coordinates with other data in a later step.
 
 ```{r}
-nsw <- readOGR(dsn = "~/Dropbox/projects/ausmaps/data/shapefiles/asgs/2011/", 
+nsw <- readOGR(dsn = "data/shapefiles/asgs/2011/", 
                layer = "MB_2011_NSW")
 nsw@data$id <- rownames(nsw@data)
 ```
