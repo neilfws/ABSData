@@ -16,6 +16,7 @@ library(knitr)
 library(gpclib)
 library(rgdal)
 library(maptools)
+library(viridis)
 
 theme_set(theme_bw())
 
@@ -90,7 +91,7 @@ eastern %>%
           panel.grid = element_blank(), 
           panel.border = element_blank()) + 
     labs(title = "Eastern Suburbs") + 
-    scale_fill_gradient2(midpoint = 1000)
+    scale_fill_viridis(option = "plasma")
 ```
 
 ## Population - Hornsby
@@ -107,7 +108,7 @@ hornsby %>%
           panel.grid = element_blank(), 
           panel.border = element_blank()) + 
     labs(title = "Hornsby") + 
-    scale_fill_gradient2(midpoint = 400)
+    scale_fill_viridis(option = "plasma")
 ```
 
 ## Empty blocks - Eastern Suburbs
